@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.0'
 services:
   dynamodb-local:
     image: "amazon/dynamodb-local:latest"
@@ -16,4 +16,4 @@ services:
       AWS_ACCESS_KEY_ID: 'DUMMYIDEXAMPLE'
       AWS_SECRET_ACCESS_KEY: 'DUMMYEXAMPLEKEY'
     command:
-      dynamodb describe-limits --endpoint-url http://dynamodb-local:8000 --region us-west-2
+      dynamodb create-table --endpoint-url http://dynamodb-local:8000 --region us-west-2 --table-name Voteable --attribute-definitions AttributeName=Id,AttributeType=S AttributeName=Question,AttributeType=S --key-schema AttributeName=Id,KeyType=HASH AttributeName=Question,KeyType=RANGE --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5

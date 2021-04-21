@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/buffup/GolangTechTask/pkg/api";
+option go_package = "pkg/api";
 
 service VotingService {
   rpc CreateVoteable(CreateVoteableRequest) returns (CreateVoteableResponse) {}
@@ -23,9 +23,12 @@ message CreateVoteableResponse {
   string uuid = 1;
 }
 
-message ListVoteableRequest { }
+message ListVoteableRequest {
+  int32 page_number = 1;
+  int32 result_per_page = 2;
+}
 
-message ListVoteableResponse {
+message ListVoteablesResponse {
   repeated Voteable votables = 1;
 }
 
