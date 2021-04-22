@@ -5,9 +5,12 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	dyndb "github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/buffup/GolangTechTask/api"
+	"github.com/google/go-cmp/cmp"
 )
 
 type mockDynamoDB struct {
@@ -69,5 +72,172 @@ func TestCreateVoteableError(t *testing.T) {
 
 	if err == nil {
 		t.Errorf("expected error not returned '%s'", err.Error())
+	}
+}
+
+func TestGetVoteables1Success(t *testing.T) {
+	want := []*api.Voteable{
+		&api.Voteable{
+			UUID:     "uuid1",
+			Question: "question1",
+			Answers:  []string{"answer1", "answer2"},
+		},
+	}
+
+	db := &mockDynamoDB{
+		mockScan: func(*dynamodb.ScanInput) (*dynamodb.ScanOutput, error) {
+			return &dynamodb.ScanOutput{
+				Count: aws.Int64(2),
+				Items: []map[string]*dyndb.AttributeValue{
+					map[string]*dyndb.AttributeValue{
+						"Id": {
+							S: aws.String("uuid1"),
+						},
+						"Question": {
+							S: aws.String("question1"),
+						},
+						"Answers": {
+							SS: aws.StringSlice([]string{"answer1", "answer2"}),
+						},
+					},
+					map[string]*dyndb.AttributeValue{
+						"Id": {
+							S: aws.String("uuid2"),
+						},
+						"Question": {
+							S: aws.String("question2"),
+						},
+						"Answers": {
+							SS: aws.StringSlice([]string{"answer3", "answer4"}),
+						},
+					},
+				},
+			}, nil
+		},
+	}
+
+	repo := NewVoteableRepo(db)
+
+	got, err := repo.GetVoteables(context.Background(), 1, 1)
+
+	if err != nil {
+		t.Errorf("unexpected error returned '%s'", err.Error())
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Errorf("expected return value to be %v, got %v", want, got)
+	}
+}
+
+func TestGetVoteables2Success(t *testing.T) {
+	want := []*api.Voteable{
+		&api.Voteable{
+			UUID:     "uuid2",
+			Question: "question2",
+			Answers:  []string{"answer3", "answer4"},
+		},
+	}
+
+	db := &mockDynamoDB{
+		mockScan: func(*dynamodb.ScanInput) (*dynamodb.ScanOutput, error) {
+			return &dynamodb.ScanOutput{
+				Count: aws.Int64(2),
+				Items: []map[string]*dyndb.AttributeValue{
+					map[string]*dyndb.AttributeValue{
+						"Id": {
+							S: aws.String("uuid1"),
+						},
+						"Question": {
+							S: aws.String("question1"),
+						},
+						"Answers": {
+							SS: aws.StringSlice([]string{"answer1", "answer2"}),
+						},
+					},
+					map[string]*dyndb.AttributeValue{
+						"Id": {
+							S: aws.String("uuid2"),
+						},
+						"Question": {
+							S: aws.String("question2"),
+						},
+						"Answers": {
+							SS: aws.StringSlice([]string{"answer3", "answer4"}),
+						},
+					},
+				},
+			}, nil
+		},
+	}
+
+	repo := NewVoteableRepo(db)
+
+	got, err := repo.GetVoteables(context.Background(), 2, 1)
+
+	if err != nil {
+		t.Errorf("unexpected error returned '%s'", err.Error())
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Errorf("expected return value to be %v, got %v", want, got)
+	}
+}
+
+func TestGetVoteables3Success(t *testing.T) {
+	want := []*api.Voteable{
+		&api.Voteable{
+			UUID:     "uuid1",
+			Question: "question1",
+			Answers:  []string{"answer1", "answer2"},
+		},
+		&api.Voteable{
+			UUID:     "uuid2",
+			Question: "question2",
+			Answers:  []string{"answer3", "answer4"},
+		},
+	}
+
+	db := &mockDynamoDB{
+		mockScan: func(*dynamodb.ScanInput) (*dynamodb.ScanOutput, error) {
+			return &dynamodb.ScanOutput{
+				Count: aws.Int64(2),
+				Items: []map[string]*dyndb.AttributeValue{
+					map[string]*dyndb.AttributeValue{
+						"Id": {
+							S: aws.String("uuid1"),
+						},
+						"Question": {
+							S: aws.String("question1"),
+						},
+						"Answers": {
+							SS: aws.StringSlice([]string{"answer1", "answer2"}),
+						},
+					},
+					map[string]*dyndb.AttributeValue{
+						"Id": {
+							S: aws.String("uuid2"),
+						},
+						"Question": {
+							S: aws.String("question2"),
+						},
+						"Answers": {
+							SS: aws.StringSlice([]string{"answer3", "answer4"}),
+						},
+					},
+				},
+			}, nil
+		},
+	}
+
+	repo := NewVoteableRepo(db)
+
+	got, err := repo.GetVoteables(context.Background(), 1, 2)
+
+	if err != nil {
+		t.Errorf("unexpected error returned '%s'", err.Error())
+	}
+
+	if !cmp.Equal(want, got) {
+		t.Errorf("expected return value to be %v, got %v", want, got)
 	}
 }

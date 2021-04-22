@@ -90,3 +90,65 @@ func TestCreateVoteable_LoggerError(t *testing.T) {
 		t.Errorf("expected error not returned '%s'", err.Error())
 	}
 }
+
+func TestListVoteables_LoggerSuccess(t *testing.T) {
+	have := &pb.ListVoteableRequest{
+		PageNumber:    1,
+		ResultPerPage: 1,
+	}
+	want := &pb.ListVoteablesResponse{
+		Votables: []*pb.Voteable{
+			&pb.Voteable{
+				Uuid:     "uuid1",
+				Question: "question1",
+				Answers:  []string{"answer1", "answer2"},
+			},
+			&pb.Voteable{
+				Uuid:     "uuid2",
+				Question: "question2",
+				Answers:  []string{"answer3", "answer4"},
+			},
+		},
+	}
+
+	server := &mockServer{
+		mockListVoteables: func() (*pb.ListVoteablesResponse, error) {
+			return want, nil
+		},
+	}
+
+	logger := log.New(ioutil.Discard, "", 0)
+	s := NewLogger(logger, server)
+
+	got, err := s.ListVoteables(context.Background(), have)
+
+	if err != nil {
+		t.Errorf("unexpected error returned '%s'", err.Error())
+	}
+
+	if !cmp.Equal(want, got, cmpopts.IgnoreUnexported(pb.ListVoteablesResponse{}, pb.Voteable{})) {
+		t.Errorf("expected return value to be %v, got %v", want, got)
+	}
+}
+
+func TestListVoteables_LoggerError(t *testing.T) {
+	have := &pb.ListVoteableRequest{
+		PageNumber:    1,
+		ResultPerPage: 1,
+	}
+
+	server := &mockServer{
+		mockListVoteables: func() (*pb.ListVoteablesResponse, error) {
+			return nil, errors.New("some error")
+		},
+	}
+
+	logger := log.New(ioutil.Discard, "", 0)
+	s := NewLogger(logger, server)
+
+	_, err := s.ListVoteables(context.Background(), have)
+
+	if err == nil {
+		t.Errorf("expected error not returned '%s'", err.Error())
+	}
+}

@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	pb "github.com/buffup/GolangTechTask/pkg/api"
@@ -100,10 +99,8 @@ func TestListVoteables_Success(t *testing.T) {
 	}
 
 	s := NewServer(repo)
-	fmt.Printf("%T %T", want, have)
 
 	got, err := s.ListVoteables(context.Background(), have)
-	fmt.Printf("%T %T", got, err)
 
 	if err != nil {
 		t.Errorf("unexpected error returned '%s'", err.Error())
