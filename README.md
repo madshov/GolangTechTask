@@ -5,4 +5,4 @@ grpcurl -v --plaintext -d '{"question":"What is pi?", "answers":["~3.14","22/7",
 grpcurl -v --plaintext -d '{"page_number":1,"result_per_page":1}' -proto api/service.proto localhost:9000 VotingService/ListVoteables
 grpcurl -v --plaintext -d '{"uuid":"<uuid>","answer_index":0}' -proto api/service.proto localhost:9000 VotingService/CastVote
 ```
-Docker-compose will create the database container and create a table `Voteable`.
+Docker-compose will create the database container and create a table `Voteable`. in the DynamoDB instance.
